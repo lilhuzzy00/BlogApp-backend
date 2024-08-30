@@ -42,11 +42,15 @@ exports.uploadImage = async (req, res) => {
 
 exports.postByUser = async (req, res) => {
     try {
+        //pagination
+        const currentPage = req.params.page || 1;
+        const perPage = 12;
         // const posts = await Post.find({postedBy: req.user._id})
         const posts = await Post.find()
+            .skip((currentPage -1) * perPage)
             .populate('postedBy', "_id name image")
             .sort({createdAt: -1})
-            .limit(18) 
+            .limit(perPage) 
         res.json(posts);
     } catch(error){
         console.log(error)
@@ -86,3 +90,36 @@ exports.deletePost = async (req, res) =>{
         console.log(error);
     }
 }
+
+exports.totalPosts = async (req, res) =>{
+    try {
+        const total = await Post.find().estimatedDocumentCount()
+        res.json(total);
+    }catch (error) {
+        console.log(error);
+    }
+}
+
+exports.posts = async (req, res) =>{
+    try {
+        const posts = await Post.find()
+        .populate('postedBy', "_id name image")
+        .sort({createdAt: -1})
+        .limit(15) 
+        res.json(posts);
+
+    }catch(error){
+        console.log(error);
+    }
+}
+
+exports.getPost = async (req, res) => {
+    try {
+        const post = await Post.findById(req.params._id)
+        .populate('postedBy', "_id name image")
+        res.json(post);
+
+    } catch(error){
+        console.log(error);
+    }
+};
